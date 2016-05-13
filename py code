@@ -1,0 +1,39 @@
+import cx_oracle,csv
+lst=[PSBLPRD2,
+WMDBPEN5,
+WMDBPEN7,
+WMDPEN11,
+ARIBPEN2,
+BODSPEN1,
+BOACPEN1,
+PSHRPWW1,
+ERM1PEN1,
+CMGTPEN1,
+DCOMPEN1,
+ESUPPEN1,
+ESUPPEN2,
+KOSHPEN1,
+ECMPEN2,
+EPRTPEN1,
+EPRTPEN1,
+PLMPEN3]
+for database in lst:
+
+ constr='sys/manager1@database'
+ conn=cx_oracle.connect(constr)
+ curs=conn.cursor()
+ sql1='select name from v$database;'
+ sql2='select used.used_size,  used.used_size-free.free_size Actual_Used ,free.free_size  from (select sum(bytes)/1024/1024 used_size from dba_data_files) used , (select sum(bytes)/1024/1024 free_size from dba_free_space) free;'
+
+ curs.execute(sql1)
+ curs.execute(sql2)
+
+ filename='/home/oracle/demo.csv'
+ with open(filename,"wb") as fout:
+  writer = csv.writer(fout)
+  writer.writerow([ i[0] for i in curs.description ]) 
+  writer.writerows(curs.fetchall())
+
+  fout.close()
+ curs.close()
+ conn.close() 
